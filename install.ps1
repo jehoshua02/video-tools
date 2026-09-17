@@ -1,5 +1,5 @@
 # Works two ways:
-#   irm <url>/install.ps1 | iex     runs in your session: clones the repo, so the tools work right away
+#   irm <url>/install.ps1 | iex     runs in your session: clones the repo into ~\video-tools, so the tools work right away
 #   .\install.ps1 (inside the repo) skips the clone
 # Both install dependencies and put the `video-tools` command on the user PATH.
 # Everything runs inside a script block so nothing leaks into the caller's session,
@@ -48,7 +48,8 @@
         } else {
             Write-Host 'git already installed.'
         }
-        $repoDir = Join-Path (Get-Location) 'video-tools'
+        # Always the home folder, never the current one: an admin shell starts in C:\Windows\System32.
+        $repoDir = Join-Path $HOME 'video-tools'
         if (Test-Path (Join-Path $repoDir '.git')) {
             Write-Host "$repoDir already exists; updating it..."
             git -C $repoDir pull --quiet --ff-only
@@ -90,7 +91,7 @@
         $_.TrimEnd('\') -ne $binDir -and
         ($_.TrimEnd('\') -like '*\video-tools\bin' -or (Test-Path (Join-Path $_ 'video-tools.cmd')))
     })
-    foreach ($old in $stale) { Write-Host "Removing older video-tools PATH entry: $old" }
+    foreach ($old in $stale) { Write-Host "Removing older video-tools PATH entry: $old (you can delete that old install folder)" }
     $kept = @($entries | Where-Object { $stale -notcontains $_ })
     if ($kept -contains $binDir -and -not $stale) {
         Write-Host 'video-tools already on PATH.'
