@@ -80,11 +80,22 @@
 
     $binDir = Join-Path $repoDir 'bin'
     $userPath = "$([Environment]::GetEnvironmentVariable('Path', 'User'))"
-    if (($userPath -split ';') -contains $binDir) {
+    # Drop entries from other video-tools installs so this one is the only one on PATH.
+    $entries = @($userPath -split ';' | Where-Object { $_ })
+    $stale = @($entries | Where-Object {
+        $_.TrimEnd('\') -ne $binDir -and
+        ($_.TrimEnd('\') -like '*\video-tools\bin' -or (Test-Path (Join-Path $_ 'video-tools.cmd')))
+    })
+    foreach ($old in $stale) { Write-Host "Removing older video-tools PATH entry: $old" }
+    $kept = @($entries | Where-Object { $stale -notcontains $_ })
+    if ($kept -contains $binDir -and -not $stale) {
         Write-Host 'video-tools already on PATH.'
     } else {
-        Write-Host "Adding $binDir to your PATH..."
-        [Environment]::SetEnvironmentVariable('Path', ((@($userPath.TrimEnd(';'), $binDir) | Where-Object { $_ }) -join ';'), 'User')
+        if ($kept -notcontains $binDir) {
+            Write-Host "Adding $binDir to your PATH..."
+            $kept += $binDir
+        }
+        [Environment]::SetEnvironmentVariable('Path', ($kept -join ';'), 'User')
     }
     Update-SessionPath
 

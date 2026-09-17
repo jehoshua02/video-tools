@@ -11,6 +11,9 @@ and update by running `git pull` there.
 - `bin\video-tools.cmd` launches the repo's code: it sets `PYTHONPATH` to the
   repo and runs `python -m video_tools`. No pip install, no packaging.
 - `install.ps1` adds the repo's `bin` folder to the **user** PATH (no admin rights).
+- Only one install is on PATH at a time: `install.ps1` removes user PATH entries
+  from other video-tools installs (entries ending in `\video-tools\bin`, or
+  folders containing `video-tools.cmd`), so the latest install wins.
 - New command `video-tools update` runs `git pull --ff-only` in the install folder.
 - Chosen over `pyproject.toml` + `pip install -e .`: no pip step, and pip's
   Scripts folder is often missing from PATH on Windows.
