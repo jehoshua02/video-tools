@@ -33,6 +33,24 @@ if (-not (Test-Command winget)) {
 
 Update-SessionPath
 
+# Run from inside the repo: skip the download. Run standalone: clone into .\video-tools.
+$repoDir = $PSScriptRoot
+if (-not (Test-Path (Join-Path $PSScriptRoot 'video_tools'))) {
+    if (-not (Test-Command git)) {
+        Install-Package 'Git.Git'
+    } else {
+        Write-Host 'git already installed.'
+    }
+    $repoDir = Join-Path (Get-Location) 'video-tools'
+    if (Test-Path $repoDir) {
+        Write-Host "$repoDir already exists; skipping download."
+    } else {
+        Write-Host "Downloading video-tools to $repoDir..."
+        git clone --quiet https://github.com/jehoshua02/video-tools.git $repoDir
+        if ($LASTEXITCODE -ne 0) { throw "git clone failed (exit $LASTEXITCODE)" }
+    }
+}
+
 $minPython = [version]'3.12'
 $py = Get-PythonVersion
 if (-not $py -or $py -lt $minPython) {
@@ -87,4 +105,4 @@ if ($failed) {
     Write-Host 'Some dependencies are missing. Open a new terminal and re-run install.ps1.'
     exit 1
 }
-Write-Host 'All dependencies installed. Open a new terminal before running the tools.'
+Write-Host "All set. Open a new terminal, then: cd `"$repoDir`""
