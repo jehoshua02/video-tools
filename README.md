@@ -60,4 +60,14 @@ pip install pytest
 python -m pytest
 ```
 
+Create a folder of dummy files to try `to-mp4` on (various formats, plus files that should fail):
+
+```powershell
+python scripts\seed_test_videos.py            # creates .\test-videos
+python scripts\seed_test_videos.py --force    # delete and recreate it
+python -m video_tools to-mp4 test-videos
+```
+
+Files named `error ...` should each end with an `.error.log`; everything else should end with an `.mp4`.
+
 Design decisions are recorded in [docs/plan/adrs](docs/plan/adrs).
