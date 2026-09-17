@@ -49,8 +49,12 @@
             Write-Host 'git already installed.'
         }
         $repoDir = Join-Path (Get-Location) 'video-tools'
-        if (Test-Path $repoDir) {
-            Write-Host "$repoDir already exists; skipping download."
+        if (Test-Path (Join-Path $repoDir '.git')) {
+            Write-Host "$repoDir already exists; updating it..."
+            git -C $repoDir pull --quiet --ff-only
+            if ($LASTEXITCODE -ne 0) { throw "Could not update $repoDir (exit $LASTEXITCODE). Delete that folder and run the install again." }
+        } elseif (Test-Path $repoDir) {
+            throw "$repoDir already exists but is not a video-tools install. Delete or rename it, or run the install from a different folder."
         } else {
             Write-Host "Downloading video-tools to $repoDir..."
             git clone --quiet https://github.com/jehoshua02/video-tools.git $repoDir
@@ -131,7 +135,12 @@
     if (Test-Command video-tools) {
         Write-Host '  OK   video-tools command'
     } else {
-        Write-Host '  FAIL video-tools command not found'
+        $launcher = Join-Path $binDir 'video-tools.cmd'
+        if (Test-Path $launcher) {
+            Write-Host "  FAIL video-tools command not found, although $launcher exists and its folder was added to PATH"
+        } else {
+            Write-Host "  FAIL video-tools command not found: $launcher is missing (incomplete or outdated download)"
+        }
         $failed = $true
     }
 
