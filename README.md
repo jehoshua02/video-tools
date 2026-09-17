@@ -45,6 +45,43 @@ If that says the file does not exist, run `dir $HOME\Downloads\install*`. Browse
 irm https://cdn.jsdelivr.net/gh/jehoshua02/video-tools@main/install.ps1 | iex
 ```
 
+### Manual install
+
+The same steps the install script does, as plain commands. Use a normal PowerShell window.
+
+1. Install the programs the tools need (skip any you already have):
+
+   ```powershell
+   winget install -e --id Git.Git
+   winget install -e --id Python.Python.3.12
+   winget install -e --id Gyan.FFmpeg
+   winget install -e --id yt-dlp.yt-dlp
+   ```
+
+2. **Open a new PowerShell window**, so it sees the newly installed programs. Then download the tools into your home folder:
+
+   ```powershell
+   git clone https://github.com/jehoshua02/video-tools.git $HOME\video-tools
+   ```
+
+3. Add the `video-tools` command to your PATH:
+
+   ```powershell
+   [Environment]::SetEnvironmentVariable('Path', ([Environment]::GetEnvironmentVariable('Path', 'User')).TrimEnd(';') + ";$HOME\video-tools\bin", 'User')
+   ```
+
+4. **Open a new PowerShell window** again, and check everything:
+
+   ```powershell
+   python --version; ffmpeg -version | select -First 1; yt-dlp --version; video-tools --help
+   ```
+
+If `git clone` can't connect, download the tools with your browser instead: save [main.zip](https://github.com/jehoshua02/video-tools/archive/refs/heads/main.zip) to Downloads, then run the command below and continue with step 3. Installed this way, `video-tools update` won't work; repeat this step to update.
+
+```powershell
+Expand-Archive $HOME\Downloads\video-tools-main.zip $HOME; ren $HOME\video-tools-main video-tools
+```
+
 ### Troubleshooting
 
 **"Unable to connect to the remote server" when running the install command.** The script never ran; the download was blocked.

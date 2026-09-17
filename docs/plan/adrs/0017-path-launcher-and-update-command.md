@@ -26,6 +26,9 @@ Launcher constraints:
   line and `update` may rewrite the launcher while it runs.
 - `python` is the last command on that line so its exit code is the launcher's.
 - `.gitattributes` forces CRLF for `*.cmd`.
+- It runs `python -P`, so the current folder is not on the import path.
+  Without it, a `video_tools` folder in the current folder (e.g. another clone)
+  shadowed the installed copy.
 
 ## Consequences
 - `video-tools <command>` works from any folder; `python -m video_tools` still works from the repo.
