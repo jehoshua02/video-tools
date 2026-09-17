@@ -28,14 +28,16 @@ If the command above can't download the script, try these in order. They all run
 **Option 2: download with curl.** `curl.exe` is built into Windows and is often allowed when PowerShell's own downloader is blocked:
 
 ```powershell
-iex (curl.exe -sL https://raw.githubusercontent.com/jehoshua02/video-tools/main/install.ps1 | Out-String)
+$s = curl.exe -sSL https://raw.githubusercontent.com/jehoshua02/video-tools/main/install.ps1 | Out-String; if ($s.Trim()) { iex $s } else { 'Download failed. See the curl error above.' }
 ```
 
-**Option 3: download with your browser.** Open [install.ps1](https://raw.githubusercontent.com/jehoshua02/video-tools/main/install.ps1), press Ctrl+S, and save it as `install.ps1` in your Downloads folder. Then run:
+**Option 3: download with your browser.** Open [install.ps1](https://raw.githubusercontent.com/jehoshua02/video-tools/main/install.ps1), press Ctrl+S, choose "Save as type: All files", and save it as `install.ps1` in your Downloads folder. Then run:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File $HOME\Downloads\install.ps1
 ```
+
+If that says the file does not exist, run `dir $HOME\Downloads\install*`. Browsers often save it as `install.ps1.txt`; rename it with `ren $HOME\Downloads\install.ps1.txt install.ps1` and run the command again.
 
 **Option 4: download from a different site**, if your network blocks `raw.githubusercontent.com` (the copy here can be a few hours behind):
 
@@ -48,7 +50,7 @@ irm https://cdn.jsdelivr.net/gh/jehoshua02/video-tools@main/install.ps1 | iex
 **"Unable to connect to the remote server" when running the install command.** The script never ran; the download was blocked.
 
 1. Open the [install.ps1 link](https://raw.githubusercontent.com/jehoshua02/video-tools/main/install.ps1) in a browser on the same computer.
-2. If the browser shows the script: your network is fine, and security software or a firewall is blocking PowerShell from the internet. Use Option 2, then Option 3.
+2. If the browser shows the script: the site is reachable, and something is blocking command-line programs. Common causes are a DNS filter (browsers often bypass it with their own secure DNS), security software, or a firewall. Use Option 2, then Option 3. To check for a DNS filter, run `Resolve-DnsName raw.githubusercontent.com`; an answer of `0.0.0.0` means the name is being blocked.
 3. If the browser can't open it either: your network is blocking the site. Turn off any VPN or web filter, try Option 4, or use another network such as a phone hotspot.
 4. To check the connection from PowerShell, run `Test-NetConnection raw.githubusercontent.com -Port 443`. `TcpTestSucceeded : True` means the site is reachable.
 
