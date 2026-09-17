@@ -9,11 +9,6 @@ ERROR_SUFFIX = ".error.log"
 # ffprobe reads plain text as "tty" and still images as image2/*_pipe.
 NON_VIDEO_FORMATS = {"tty", "image2"}
 
-VIDEO_EXTENSIONS = {
-    ".3gp", ".asf", ".avi", ".divx", ".f4v", ".flv", ".m2ts", ".m4v", ".mkv", ".mov",
-    ".mpeg", ".mpg", ".mts", ".ogv", ".ts", ".vob", ".webm", ".wmv",
-}
-
 
 def run(folder: Path) -> int:
     for tool in ("ffmpeg", "ffprobe"):
@@ -42,14 +37,16 @@ def run(folder: Path) -> int:
             continue
 
         info, probe_error = probe(src)
-        if info is None:
-            if src.suffix.lower() in VIDEO_EXTENSIONS:
-                log = write_error_log(src, f"ffprobe could not read this file.\n\n{probe_error}")
-                print(f"failed     {src.name} (see {log.name})")
-                counts["failed"] += 1
-            continue
-        video = pick_video_stream(info)
+        video = pick_video_stream(info) if info else None
         if video is None:
+            if info is None:
+                reason = f"ffprobe could not read this file.\n\n{probe_error}"
+            else:
+                fmt = info.get("format", {}).get("format_name", "unknown")
+                reason = f"Not a video: no video stream found (detected format: {fmt})."
+            log = write_error_log(src, reason)
+            print(f"failed     {src.name} (see {log.name})")
+            counts["failed"] += 1
             continue
 
         result = convert(src, target, info, video)

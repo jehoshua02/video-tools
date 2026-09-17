@@ -31,7 +31,7 @@ python -m video_tools to-mp4 "D:\Videos\Inbox"
 - Safe to re-run. Skips files that are already `.mp4` or already have a matching `.mp4`.
 - Copies H.264/AAC videos into mp4 without re-encoding (fast, no quality loss). Re-encodes everything else to H.264/AAC.
 - If a video fails, writes the error to `foo.error.log` next to it and moves on. Failed files are retried on the next run, and the log is removed once they convert.
-- Files with a video extension that can't be read (corrupt) also count as failed and get an error log.
+- Nothing is silently ignored: every file ends up with a matching `.mp4` or a `.error.log`. Files that aren't videos (photos, text, audio) or can't be read also get an error log and count as failed.
 - Exits with a non-zero code if any file failed.
 
 ### download

@@ -33,19 +33,15 @@ def folder(tmp_path: Path) -> Path:
     make_video(tmp_path / "b_remux.mkv", "libx264", "aac")
     make_video(tmp_path / "c_noaudio.mov", "mpeg4", None)
     make_video(tmp_path / "already.mp4", "libx264", "aac")
-    (tmp_path / "notes.txt").write_text("not a video")
-    ffmpeg("-f", "lavfi", "-i", "color=red:size=8x8", "-frames:v", "1", str(tmp_path / "picture.png"))
     return tmp_path
 
 
-def test_converts_videos_and_ignores_others(folder: Path, capsys):
+def test_converts_videos(folder: Path, capsys):
     assert to_mp4.run(folder) == 0
 
     assert codecs(folder / "a_reencode.mp4") == {"video": "h264", "audio": "aac"}
     assert codecs(folder / "b_remux.mp4") == {"video": "h264", "audio": "aac"}
     assert codecs(folder / "c_noaudio.mp4") == {"video": "h264"}
-    assert not (folder / "notes.mp4").exists()
-    assert not (folder / "picture.mp4").exists()
     assert not list(folder.glob("*.partial"))
     assert not list(folder.glob("*.error.log"))
 
@@ -109,16 +105,32 @@ def test_success_removes_stale_error_log(folder: Path):
     assert not (folder / "a_reencode.error.log").exists()
 
 
-def test_unreadable_video_extension_is_logged_as_failed(tmp_path: Path, capsys):
-    (tmp_path / "broken.MKV").write_text("garbage")
-    (tmp_path / "broken.dat").write_text("garbage")
+def test_every_file_ends_as_mp4_or_error_log(tmp_path: Path, capsys):
+    make_video(tmp_path / "clip.avi", "mpeg4", None)
+    (tmp_path / "broken.mkv").write_bytes(b"\x00\x01garbage" * 50)
+    (tmp_path / "notes.txt").write_text("not a video")
+    ffmpeg("-f", "lavfi", "-i", "color=red:size=8x8", "-frames:v", "1", str(tmp_path / "picture.png"))
+    ffmpeg("-f", "lavfi", "-i", "sine=duration=1", str(tmp_path / "song.mp3"))
 
     assert to_mp4.run(tmp_path) == 1
 
-    log = (tmp_path / "broken.error.log").read_text(encoding="utf-8")
-    assert "ffprobe could not read this file" in log
-    assert "broken.MKV" in log
-    assert not (tmp_path / "broken.mp4").exists()
+    assert (tmp_path / "clip.mp4").exists()
+    for stem in ("broken", "notes", "picture", "song"):
+        assert not (tmp_path / f"{stem}.mp4").exists()
+        assert (tmp_path / f"{stem}.error.log").read_text(encoding="utf-8").strip()
+    assert "ffprobe could not read" in (tmp_path / "broken.error.log").read_text(encoding="utf-8")
+    assert "Not a video" in (tmp_path / "song.error.log").read_text(encoding="utf-8")
+    assert "1 converted, 0 remuxed, 0 skipped, 4 failed" in capsys.readouterr().out
+
+
+def test_error_logs_are_not_processed_on_rerun(tmp_path: Path, capsys):
+    (tmp_path / "notes.txt").write_text("not a video")
+    to_mp4.run(tmp_path)
+    capsys.readouterr()
+
+    assert to_mp4.run(tmp_path) == 1
+
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["notes.error.log", "notes.txt"]
     assert "0 skipped, 1 failed" in capsys.readouterr().out
 
 

@@ -1,7 +1,7 @@
 # 0013. Log unreadable files with video extensions
 
 ## Status
-Accepted. Amends [[0008-ffprobe-video-detection]].
+Superseded by [[0016-no-silent-skips]]. Amended [[0008-ffprobe-video-detection]].
 
 ## Context
 With ffprobe-only detection, a corrupt video (e.g. a broken `.mkv`) looks the
