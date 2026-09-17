@@ -7,10 +7,10 @@ Command-line video tools for Windows.
 Requires Windows 10 or 11 (winget is built in). In PowerShell, from the folder where you want the tools:
 
 ```powershell
-iwr https://raw.githubusercontent.com/jehoshua02/video-tools/main/install.ps1 -OutFile $env:TEMP\video-tools-install.ps1; powershell -ExecutionPolicy Bypass -File $env:TEMP\video-tools-install.ps1
+irm https://raw.githubusercontent.com/jehoshua02/video-tools/main/install.ps1 | iex
 ```
 
-This downloads and runs the install script, which installs git if missing, clones the tools into `video-tools`, installs Python 3.12+, ffmpeg and yt-dlp if missing, then verifies them. Open a new terminal afterwards.
+This runs the install script, which installs git if missing, clones the tools into `video-tools`, installs Python 3.12+, ffmpeg and yt-dlp if missing, verifies them, and leaves you inside the `video-tools` folder ready to go.
 
 To update later, run `git pull` in the `video-tools` folder.
 
