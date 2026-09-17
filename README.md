@@ -14,7 +14,7 @@ This runs the install script, which:
 
 - installs git, Python 3.12+, ffmpeg and yt-dlp if missing
 - clones the tools into a `video-tools` folder
-- adds the `video-tools` command to your PATH, so it works from any folder
+- adds the `video-tools` command to your PATH, so it works from any folder (replacing the PATH entry of any earlier install)
 - verifies everything
 
 Then try `video-tools --help`. If the command isn't found, open a new terminal.
