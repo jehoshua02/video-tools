@@ -4,15 +4,15 @@ Command-line video tools for Windows.
 
 ## Install
 
-Requires Windows with git and winget.
+Requires Windows 10 or 11 (winget is built in). In PowerShell, from the folder where you want the tools:
 
 ```powershell
-git clone https://github.com/jehoshua02/video-tools.git
-cd video-tools
-powershell -ExecutionPolicy Bypass -File install.ps1
+iwr https://raw.githubusercontent.com/jehoshua02/video-tools/main/install.ps1 -OutFile $env:TEMP\video-tools-install.ps1; powershell -ExecutionPolicy Bypass -File $env:TEMP\video-tools-install.ps1
 ```
 
-The script installs Python 3.12+, ffmpeg and yt-dlp if missing, then verifies them. Open a new terminal afterwards.
+This downloads and runs the install script, which installs git if missing, clones the tools into `video-tools`, installs Python 3.12+, ffmpeg and yt-dlp if missing, then verifies them. Open a new terminal afterwards.
+
+To update later, run `git pull` in the `video-tools` folder.
 
 ## Tools
 
@@ -33,6 +33,16 @@ python -m video_tools to-mp4 "D:\Videos\Inbox"
 - If a video fails, writes the error to `foo.error.log` next to it and moves on. Failed files are retried on the next run, and the log is removed once they convert.
 - Nothing is silently ignored: every file ends up with a matching `.mp4` or a `.error.log`. Files that aren't videos (photos, text, audio) or can't be read also get an error log and count as failed.
 - Exits with a non-zero code if any file failed.
+
+To try it safely first, create a folder of dummy files (various formats, plus files that should fail):
+
+```powershell
+python scripts\seed_test_videos.py            # creates .\test-videos
+python scripts\seed_test_videos.py --force    # delete and recreate it
+python -m video_tools to-mp4 test-videos
+```
+
+Files named `error ...` should each end with an `.error.log`; everything else should end with an `.mp4`.
 
 ### download
 
