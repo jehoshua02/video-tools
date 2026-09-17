@@ -11,6 +11,9 @@ and update by running `git pull` there.
 - `bin\video-tools.cmd` launches the repo's code: it sets `PYTHONPATH` to the
   repo and runs `python -m video_tools`. No pip install, no packaging.
 - `install.ps1` adds the repo's `bin` folder to the **user** PATH (no admin rights).
+- The one-liner always installs into `~\video-tools` (the user's home folder),
+  never the current folder: an administrator shell starts in
+  `C:\Windows\System32`, and installs should not depend on where the user is.
 - Only one install is on PATH at a time: `install.ps1` removes user PATH entries
   from other video-tools installs (entries ending in `\video-tools\bin`, or
   folders containing `video-tools.cmd`), so the latest install wins.

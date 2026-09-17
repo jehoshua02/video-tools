@@ -4,7 +4,7 @@ Command-line video tools for Windows.
 
 ## Install
 
-Requires Windows 10 or 11 (winget is built in). In PowerShell, from the folder where you want the tools:
+Requires Windows 10 or 11 (winget is built in). In a normal PowerShell window (not "Run as administrator"):
 
 ```powershell
 irm https://raw.githubusercontent.com/jehoshua02/video-tools/main/install.ps1 | iex
@@ -13,13 +13,19 @@ irm https://raw.githubusercontent.com/jehoshua02/video-tools/main/install.ps1 | 
 This runs the install script, which:
 
 - installs git, Python 3.12+, ffmpeg and yt-dlp if missing
-- clones the tools into a `video-tools` folder
+- clones the tools into `video-tools` in your home folder (`C:\Users\<you>\video-tools`), or updates them if already there
 - adds the `video-tools` command to your PATH, so it works from any folder (replacing the PATH entry of any earlier install)
 - verifies everything
 
 Then try `video-tools --help`. If the command isn't found, open a new terminal.
 
-To uninstall, delete the `video-tools` folder and remove its `bin` folder from your user PATH.
+To uninstall, delete `C:\Users\<you>\video-tools` and remove its `bin` folder from your user PATH.
+
+If the download fails with "Unable to connect to the remote server", your network is blocking `raw.githubusercontent.com`. Use this instead:
+
+```powershell
+irm https://cdn.jsdelivr.net/gh/jehoshua02/video-tools@main/install.ps1 | iex
+```
 
 ## Tools
 
