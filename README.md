@@ -44,6 +44,7 @@ python -m video_tools download "https://www.youtube.com/watch?v=..." -o "D:\Vide
 ```
 
 - Saves to your Downloads folder unless `-o` is given. The file is named after the video title.
+- Prefers H.264 video so it plays on most devices (usually up to 1080p).
 - One video per run; playlist links download only the linked video.
 - Skips the download if the file already exists.
 - If downloads start failing, update yt-dlp: `winget upgrade yt-dlp.yt-dlp`

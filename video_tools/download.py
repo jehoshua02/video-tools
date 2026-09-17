@@ -2,7 +2,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-FORMAT = "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]"
+FORMAT = "bv*[vcodec^=avc1]+ba[ext=m4a]/bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]"
 
 
 def build_command(url: str, folder: Path) -> list[str]:

@@ -26,7 +26,7 @@ def test_downloads_to_given_folder(tmp_path: Path, calls):
 
     assert calls == [[
         "yt-dlp", "--no-playlist",
-        "-f", "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]",
+        "-f", "bv*[vcodec^=avc1]+ba[ext=m4a]/bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]",
         "--merge-output-format", "mp4",
         "-o", str(tmp_path / "%(title)s.%(ext)s"),
         URL,
