@@ -9,6 +9,11 @@ ERROR_SUFFIX = ".error.log"
 # ffprobe reads plain text as "tty" and still images as image2/*_pipe.
 NON_VIDEO_FORMATS = {"tty", "image2"}
 
+VIDEO_EXTENSIONS = {
+    ".3gp", ".asf", ".avi", ".divx", ".f4v", ".flv", ".m2ts", ".m4v", ".mkv", ".mov",
+    ".mpeg", ".mpg", ".mts", ".ogv", ".ts", ".vob", ".webm", ".wmv",
+}
+
 
 def run(folder: Path) -> int:
     for tool in ("ffmpeg", "ffprobe"):
@@ -36,8 +41,14 @@ def run(folder: Path) -> int:
             counts["skipped"] += 1
             continue
 
-        info = probe(src)
-        video = pick_video_stream(info) if info else None
+        info, probe_error = probe(src)
+        if info is None:
+            if src.suffix.lower() in VIDEO_EXTENSIONS:
+                log = write_error_log(src, f"ffprobe could not read this file.\n\n{probe_error}")
+                print(f"failed     {src.name} (see {log.name})")
+                counts["failed"] += 1
+            continue
+        video = pick_video_stream(info)
         if video is None:
             continue
 
@@ -51,20 +62,22 @@ def run(folder: Path) -> int:
     return 1 if counts["failed"] else 0
 
 
-def probe(src: Path) -> dict | None:
-    proc = subprocess.run(
-        ["ffprobe", "-v", "error", "-print_format", "json", "-show_format", "-show_streams", str(src)],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
+def probe(src: Path) -> tuple[dict | None, str]:
+    cmd = ["ffprobe", "-v", "error", "-print_format", "json", "-show_format", "-show_streams", str(src)]
+    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    error = f"command: {subprocess.list2cmdline(cmd)}\nexit code: {proc.returncode}\n\n{proc.stderr}"
     if proc.returncode != 0:
-        return None
+        return None, error
     try:
-        return json.loads(proc.stdout)
+        return json.loads(proc.stdout), error
     except json.JSONDecodeError:
-        return None
+        return None, error
+
+
+def write_error_log(src: Path, text: str) -> Path:
+    log = src.with_name(src.stem + ERROR_SUFFIX)
+    log.write_text(text, encoding="utf-8")
+    return log
 
 
 def pick_video_stream(info: dict) -> dict | None:
@@ -119,9 +132,6 @@ def convert(src: Path, target: Path, info: dict, video: dict) -> str:
         print(f"{kind:<10} {src.name} -> {target.name}")
         return kind
 
-    log.write_text(
-        f"command: {subprocess.list2cmdline(cmd)}\nexit code: {proc.returncode}\n\n{proc.stderr}",
-        encoding="utf-8",
-    )
+    write_error_log(src, f"command: {subprocess.list2cmdline(cmd)}\nexit code: {proc.returncode}\n\n{proc.stderr}")
     print(f"failed     {src.name} (see {log.name})")
     return "failed"

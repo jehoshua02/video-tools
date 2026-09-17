@@ -109,5 +109,18 @@ def test_success_removes_stale_error_log(folder: Path):
     assert not (folder / "a_reencode.error.log").exists()
 
 
+def test_unreadable_video_extension_is_logged_as_failed(tmp_path: Path, capsys):
+    (tmp_path / "broken.MKV").write_text("garbage")
+    (tmp_path / "broken.dat").write_text("garbage")
+
+    assert to_mp4.run(tmp_path) == 1
+
+    log = (tmp_path / "broken.error.log").read_text(encoding="utf-8")
+    assert "ffprobe could not read this file" in log
+    assert "broken.MKV" in log
+    assert not (tmp_path / "broken.mp4").exists()
+    assert "0 skipped, 1 failed" in capsys.readouterr().out
+
+
 def test_missing_folder(tmp_path: Path):
     assert to_mp4.run(tmp_path / "nope") == 2
