@@ -1,6 +1,7 @@
 # Works two ways:
-#   irm <url>/install.ps1 | iex     runs in your session: clones the repo and cd's into it
-#   .\install.ps1 (inside the repo) only installs and verifies dependencies
+#   irm <url>/install.ps1 | iex     runs in your session: clones the repo, so the tools work right away
+#   .\install.ps1 (inside the repo) skips the clone
+# Both install dependencies and put the `video-tools` command on the user PATH.
 # Everything runs inside a script block so nothing leaks into the caller's session,
 # and there is no `exit`, which would close the terminal under iex.
 & {
@@ -77,6 +78,16 @@
         Write-Host 'yt-dlp already installed.'
     }
 
+    $binDir = Join-Path $repoDir 'bin'
+    $userPath = "$([Environment]::GetEnvironmentVariable('Path', 'User'))"
+    if (($userPath -split ';') -contains $binDir) {
+        Write-Host 'video-tools already on PATH.'
+    } else {
+        Write-Host "Adding $binDir to your PATH..."
+        [Environment]::SetEnvironmentVariable('Path', ((@($userPath.TrimEnd(';'), $binDir) | Where-Object { $_ }) -join ';'), 'User')
+    }
+    Update-SessionPath
+
     Write-Host ''
     Write-Host 'Verifying...'
     $failed = $false
@@ -106,12 +117,18 @@
         $failed = $true
     }
 
+    if (Test-Command video-tools) {
+        Write-Host '  OK   video-tools command'
+    } else {
+        Write-Host '  FAIL video-tools command not found'
+        $failed = $true
+    }
+
     Write-Host ''
     if ($failed) {
         throw 'Some dependencies are missing. Open a new terminal and run the install again.'
     }
 
-    Set-Location $repoDir
-    Write-Host "All set. You are in $repoDir"
-    Write-Host 'Try: python -m video_tools --help'
+    Write-Host "All set. Installed in $repoDir"
+    Write-Host 'Try: video-tools --help  (open a new terminal if the command is not found)'
 }
