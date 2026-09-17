@@ -47,6 +47,12 @@ if (-not ((Test-Command ffmpeg) -and (Test-Command ffprobe))) {
     Write-Host 'ffmpeg already installed.'
 }
 
+if (-not (Test-Command yt-dlp)) {
+    Install-Package 'yt-dlp.yt-dlp'
+} else {
+    Write-Host 'yt-dlp already installed.'
+}
+
 Write-Host ''
 Write-Host 'Verifying...'
 $failed = $false
@@ -67,6 +73,13 @@ foreach ($tool in 'ffmpeg', 'ffprobe') {
         Write-Host "  FAIL $tool not found"
         $failed = $true
     }
+}
+
+if (Test-Command yt-dlp) {
+    Write-Host "  OK   yt-dlp $(& yt-dlp --version 2>$null)"
+} else {
+    Write-Host '  FAIL yt-dlp not found'
+    $failed = $true
 }
 
 Write-Host ''

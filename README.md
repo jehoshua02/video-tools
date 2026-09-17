@@ -12,7 +12,7 @@ cd video-tools
 powershell -ExecutionPolicy Bypass -File install.ps1
 ```
 
-The script installs Python 3.12+ and ffmpeg if missing, then verifies them. Open a new terminal afterwards.
+The script installs Python 3.12+, ffmpeg and yt-dlp if missing, then verifies them. Open a new terminal afterwards.
 
 ## Tools
 
@@ -31,7 +31,22 @@ python -m video_tools to-mp4 "D:\Videos\Inbox"
 - Safe to re-run. Skips files that are already `.mp4` or already have a matching `.mp4`.
 - Copies H.264/AAC videos into mp4 without re-encoding (fast, no quality loss). Re-encodes everything else to H.264/AAC.
 - If a video fails, writes the error to `foo.error.log` next to it and moves on. Failed files are retried on the next run, and the log is removed once they convert.
+- Files with a video extension that can't be read (corrupt) also count as failed and get an error log.
 - Exits with a non-zero code if any file failed.
+
+### download
+
+Downloads a YouTube video as mp4.
+
+```powershell
+python -m video_tools download "https://www.youtube.com/watch?v=..."
+python -m video_tools download "https://www.youtube.com/watch?v=..." -o "D:\Videos\Inbox"
+```
+
+- Saves to your Downloads folder unless `-o` is given. The file is named after the video title.
+- One video per run; playlist links download only the linked video.
+- Skips the download if the file already exists.
+- If downloads start failing, update yt-dlp: `winget upgrade yt-dlp.yt-dlp`
 
 ## Development
 
