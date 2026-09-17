@@ -21,11 +21,52 @@ Then try `video-tools --help`. If the command isn't found, open a new terminal.
 
 To uninstall, delete `C:\Users\<you>\video-tools` and remove its `bin` folder from your user PATH.
 
-If the download fails with "Unable to connect to the remote server", your network is blocking `raw.githubusercontent.com`. Use this instead:
+### Other ways to install
+
+If the command above can't download the script, try these in order. They all run the same install script.
+
+**Option 2: download with curl.** `curl.exe` is built into Windows and is often allowed when PowerShell's own downloader is blocked:
+
+```powershell
+iex (curl.exe -sL https://raw.githubusercontent.com/jehoshua02/video-tools/main/install.ps1 | Out-String)
+```
+
+**Option 3: download with your browser.** Open [install.ps1](https://raw.githubusercontent.com/jehoshua02/video-tools/main/install.ps1), press Ctrl+S, and save it as `install.ps1` in your Downloads folder. Then run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File $HOME\Downloads\install.ps1
+```
+
+**Option 4: download from a different site**, if your network blocks `raw.githubusercontent.com` (the copy here can be a few hours behind):
 
 ```powershell
 irm https://cdn.jsdelivr.net/gh/jehoshua02/video-tools@main/install.ps1 | iex
 ```
+
+### Troubleshooting
+
+**"Unable to connect to the remote server" when running the install command.** The script never ran; the download was blocked.
+
+1. Open the [install.ps1 link](https://raw.githubusercontent.com/jehoshua02/video-tools/main/install.ps1) in a browser on the same computer.
+2. If the browser shows the script: your network is fine, and security software or a firewall is blocking PowerShell from the internet. Use Option 2, then Option 3.
+3. If the browser can't open it either: your network is blocking the site. Turn off any VPN or web filter, try Option 4, or use another network such as a phone hotspot.
+4. To check the connection from PowerShell, run `Test-NetConnection raw.githubusercontent.com -Port 443`. `TcpTestSucceeded : True` means the site is reachable.
+
+Running PowerShell as administrator does not fix this, and isn't needed for any part of the install.
+
+**The script runs, but winget or the git download fails with a connection error.** The same security software is blocking command-line tools in general. Allow them, or pause the protection while you install.
+
+**"FAIL video-tools command not found".** The line says whether the launcher file is missing. If it is, delete `C:\Users\<you>\video-tools` and run the install again.
+
+**"video-tools is not recognized" after a successful install.** Open a new terminal, so it picks up the updated PATH.
+
+**"already exists but is not a video-tools install".** A different `video-tools` folder is in your home folder. Rename or delete it, then run the install again.
+
+**The install ends with "Some dependencies are missing".** Open a new terminal and run the install command again. It is safe to repeat; it skips what is already installed.
+
+**A video fails to convert.** Open the `.error.log` file next to it; it contains the exact ffmpeg error.
+
+**`video-tools download` starts failing.** YouTube changes often. Update the downloader: `winget upgrade yt-dlp.yt-dlp`
 
 ## Tools
 
